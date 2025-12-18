@@ -157,8 +157,8 @@
         }
         
         .page-title {
-            font-size: 22px;
-            font-weight: 700;
+            font-size: 18px; /* 修改3：改小字号 */
+            font-weight: normal; /* 修改3：取消粗体 */
             color: #8a2be2;
             display: flex;
             align-items: center;
@@ -169,7 +169,7 @@
             content: '✦';
             margin-right: 10px;
             color: #9370db;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .page-number {
@@ -402,6 +402,68 @@
             line-height: 1.5;
         }
         
+        /* LocalStorage状态提示 */
+        .save-status {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(72, 61, 139, 0.8);
+            color: #ffffff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .save-status.show {
+            opacity: 1;
+        }
+        
+        /* 清除数据按钮 - 修改4：改为蓝紫色 */
+        .clear-data-btn {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(106, 90, 205, 0.7); /* 修改4：蓝紫色 */
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-data-btn:hover {
+            background-color: rgba(138, 43, 226, 0.9); /* 修改4：悬停时更深的蓝紫色 */
+            transform: translateX(-50%) translateY(-2px);
+        }
+        
+        /* 语言切换下拉菜单 */
+        .language-selector {
+            position: fixed;
+            top: 14px;
+            left: 18px;
+            z-index: 100;
+            opacity: 0.7;
+        }
+        
+        .language-selector select {
+            background-color: rgba(20, 20, 35, 0.8);
+            color: #6b7cff;
+            border: 1px solid #6a5acd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
         /* 响应式设计 */
         @media (max-width: 768px) {
             body {
@@ -433,7 +495,7 @@
             }
             
             .page-title {
-                font-size: 20px;
+                font-size: 16px;
             }
             
             .section-title {
@@ -451,6 +513,23 @@
                 margin-top: 10px;
                 font-size: 13px;
             }
+            
+            .save-status {
+                bottom: 80px;
+                font-size: 12px;
+                width: 90%;
+                text-align: center;
+            }
+            
+            .clear-data-btn {
+                bottom: 45px;
+                font-size: 11px;
+            }
+            
+            .language-selector {
+                top: 10px;
+                left: 10px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -459,7 +538,7 @@
             }
             
             .page-title {
-                font-size: 18px;
+                font-size: 14px;
             }
             
             .section-title {
@@ -545,18 +624,6 @@
             transform: rotate(45deg);
             box-shadow: 0 0 25px #9370db;
         }
-        
-        /* 鼠标拖尾效果标签 */
-        .trail-label {
-            position: fixed;
-            top: 14px;
-            left: 18px;
-            color: #6b7cff;
-            font-size: 14px;
-            letter-spacing: 1px;
-            z-index: 100;
-            opacity: 0.7;
-        }
     </style>
 </head>
 <body>
@@ -568,8 +635,13 @@
     <div class="sci-fi-decoration decoration-2"></div>
     <div class="sci-fi-decoration decoration-3"></div>
     
-    <!-- 鼠标拖尾效果标签 -->
-    <div class="trail-label">中文版</div>
+    <!-- 语言切换下拉菜单 - 修改1：添加下拉菜单 -->
+    <div class="language-selector">
+        <select id="languageSelect">
+            <option value="zh">中文版</option>
+            <option value="en">English</option>
+        </select>
+    </div>
     
     <!-- 版权信息 - 修改2：增大字号 -->
     <div class="copyright">©️machinariumAIsupport</div>
@@ -577,7 +649,14 @@
     <!-- 日期戳 - 修改2：增大字号 -->
     <div class="date-stamp">20251212</div>
     
-    <div class="container">
+    <!-- LocalStorage状态提示 -->
+    <div class="save-status" id="saveStatus">内容已自动保存</div>
+    
+    <!-- 清除数据按钮 - 修改4：改为蓝紫色 -->
+    <button class="clear-data-btn" id="clearDataBtn">清除所有数据</button>
+    
+    <!-- 中文版容器 -->
+    <div class="container" id="chineseVersion">
         <!-- 页面头部 -->
         <div class="header">
             <div class="title">
@@ -595,15 +674,16 @@
             </button>
         </div>
         
-        <!-- 页面1：封面 -->
+        <!-- 页面1：封面 - 修改3：更改标题 -->
         <div class="card">
             <div class="page-header">
-                <div class="page-title">封面</div>
+                <div class="page-title">刷新或关闭不会丢失数据，隐身模式下不可用</div>
                 <div class="page-number">第 1 页</div>
             </div>
             
             <div class="year-nav">
-                <span>2015</span> < | > <span>2026</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> < | > <span>2026</span>
             </div>
             
             <div class="content" style="text-align: center; font-size: 26px; font-weight: 700; margin: 30px 0; color: #b19cd9; text-shadow: 0 0 10px rgba(177, 156, 217, 0.5);">
@@ -616,12 +696,12 @@
             
             <div class="input-area">
                 <label class="input-label">日期：</label>
-                <input type="text" class="input-field" id="date-input" placeholder="请输入日期">
+                <input type="text" class="input-field" id="date-input-zh" placeholder="请输入日期">
             </div>
             
             <div class="input-area">
                 <label class="input-label">签名：</label>
-                <input type="text" class="input-field" id="signature-input" placeholder="请在此签名">
+                <input type="text" class="input-field" id="signature-input-zh" placeholder="请在此签名">
             </div>
             
             <div class="note">
@@ -663,7 +743,8 @@
             <div class="divider"></div>
             
             <div class="year-nav">
-                <span>2015</span> * | * <span>2016</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> * | * <span>2026</span>
             </div>
             
             <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 20px 0; color: #b19cd9;">
@@ -672,12 +753,12 @@
             
             <div class="input-area">
                 <label class="input-label">今年我的代表词汇：</label>
-                <input type="text" class="input-field" id="word-input" placeholder="选择一个词来表示新的一年。当你需要额外能量时，可以回看这个词，它会提醒你不要放弃自己的梦想。">
+                <input type="text" class="input-field" id="word-input-zh" placeholder="选择一个词来表示新的一年。当你需要额外能量时，可以回看这个词，它会提醒你不要放弃自己的梦想。">
             </div>
             
             <div class="input-area">
                 <label class="input-label">秘密心愿：</label>
-                <textarea class="input-field" id="wish-input" placeholder="发挥你的想象，新的一年你有什么秘密的心愿？"></textarea>
+                <textarea class="input-field" id="wish-input-zh" placeholder="发挥你的想象，新的一年你有什么秘密的心愿？"></textarea>
             </div>
             
             <div class="highlight-box">
@@ -694,7 +775,8 @@
             </div>
             
             <div class="year-nav">
-                <span>2015</span> * | * <span>2026</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> * | * <span>2026</span>
             </div>
             
             <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
@@ -709,34 +791,34 @@
                 <div class="flex-item">
                     <div class="input-area">
                         <label class="input-label">今年我不会再在...上拖延：</label>
-                        <textarea class="input-field" id="procrastination-input"></textarea>
+                        <textarea class="input-field" id="procrastination-input-zh"></textarea>
                     </div>
                     
                     <div class="input-area">
                         <label class="input-label">今年我会从...上汲取最大的能量：</label>
-                        <textarea class="input-field" id="energy-input"></textarea>
+                        <textarea class="input-field" id="energy-input-zh"></textarea>
                     </div>
                     
                     <div class="input-area">
                         <label class="input-label">今年...时我会答应：</label>
-                        <textarea class="input-field" id="agree-input"></textarea>
+                        <textarea class="input-field" id="agree-input-zh"></textarea>
                     </div>
                 </div>
                 
                 <div class="flex-item">
                     <div class="input-area">
                         <label class="input-label">今年当...时我会变得最勇敢：</label>
-                        <textarea class="input-field" id="brave-input"></textarea>
+                        <textarea class="input-field" id="brave-input-zh"></textarea>
                     </div>
                     
                     <div class="input-area">
                         <label class="input-label">今年我会建议自己...：</label>
-                        <textarea class="input-field" id="advice-input"></textarea>
+                        <textarea class="input-field" id="advice-input-zh"></textarea>
                     </div>
                     
                     <div class="input-area">
                         <label class="input-label">今年对我很特别，因为...：</label>
-                        <textarea class="input-field" id="special-input"></textarea>
+                        <textarea class="input-field" id="special-input-zh"></textarea>
                     </div>
                 </div>
             </div>
@@ -771,7 +853,7 @@
                     打开过去一年的日历，回顾每个星期。如果你看到了一件重要的事，不管是家庭朋友聚会，或者是一个有意义的项目，写在这儿。
                 </div>
                 <div class="input-area">
-                    <textarea class="input-field" id="calendar-review-input" placeholder="记录过去一年中的重要事件"></textarea>
+                    <textarea class="input-field" id="calendar-review-input-zh" placeholder="记录过去一年中的重要事件"></textarea>
                 </div>
             </div>
             
@@ -782,34 +864,34 @@
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">让我周围环境变得舒适的二样东西：</label>
-                            <textarea class="input-field" id="comfort-input"></textarea>
+                            <textarea class="input-field" id="comfort-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我会定期通过这三个方式释放一下自己：</label>
-                            <textarea class="input-field" id="release-input"></textarea>
+                            <textarea class="input-field" id="release-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我会用这三个礼物奖赏自己的成功：</label>
-                            <textarea class="input-field" id="reward-input"></textarea>
+                            <textarea class="input-field" id="reward-input-zh"></textarea>
                         </div>
                     </div>
                     
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">我每天早晨都会做的工作事：</label>
-                            <textarea class="input-field" id="morning-input"></textarea>
+                            <textarea class="input-field" id="morning-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我会去这三个地方：</label>
-                            <textarea class="input-field" id="places-input"></textarea>
+                            <textarea class="input-field" id="places-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我会通过这三种方式联结我爱的人：</label>
-                            <textarea class="input-field" id="connect-input"></textarea>
+                            <textarea class="input-field" id="connect-input-zh"></textarea>
                         </div>
                     </div>
                 </div>
@@ -824,7 +906,8 @@
             </div>
             
             <div class="year-nav">
-                <span>2015</span> | <span>2026</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
             </div>
             
             <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
@@ -838,34 +921,34 @@
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">我最喜欢的三件关于自己的事：</label>
-                            <textarea class="input-field" id="like-about-me-input"></textarea>
+                            <textarea class="input-field" id="like-about-me-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我最想做到的三件事：</label>
-                            <textarea class="input-field" id="want-to-do-input"></textarea>
+                            <textarea class="input-field" id="want-to-do-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我有勇气说不的三件事：</label>
-                            <textarea class="input-field" id="say-no-input"></textarea>
+                            <textarea class="input-field" id="say-no-input-zh"></textarea>
                         </div>
                     </div>
                     
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">三件我准备好放手的事：</label>
-                            <textarea class="input-field" id="let-go-input"></textarea>
+                            <textarea class="input-field" id="let-go-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">在我困难时可以成为支柱的三个人：</label>
-                            <textarea class="input-field" id="support-people-input"></textarea>
+                            <textarea class="input-field" id="support-people-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">我要去探索的三个方向：</label>
-                            <textarea class="input-field" id="explore-input"></textarea>
+                            <textarea class="input-field" id="explore-input-zh"></textarea>
                         </div>
                     </div>
                 </div>
@@ -887,44 +970,44 @@
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">个人生活：家庭</label>
-                            <textarea class="input-field" id="personal-life-input"></textarea>
+                            <textarea class="input-field" id="personal-life-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">朋友：社群</label>
-                            <textarea class="input-field" id="friends-input"></textarea>
+                            <textarea class="input-field" id="friends-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">休闲：爱好：创造力</label>
-                            <textarea class="input-field" id="hobbies-input"></textarea>
+                            <textarea class="input-field" id="hobbies-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">心理健康：自我认知</label>
-                            <textarea class="input-field" id="mental-health-input"></textarea>
+                            <textarea class="input-field" id="mental-health-input-zh"></textarea>
                         </div>
                     </div>
                     
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">事业：学业</label>
-                            <textarea class="input-field" id="career-input"></textarea>
+                            <textarea class="input-field" id="career-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">身体健康</label>
-                            <textarea class="input-field" id="physical-health-input"></textarea>
+                            <textarea class="input-field" id="physical-health-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">那些定义你的习惯</label>
-                            <textarea class="input-field" id="habits-input"></textarea>
+                            <textarea class="input-field" id="habits-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">明天会更好*<br><small>*今年你做了什么，让世界变得更好？</small></label>
-                            <textarea class="input-field" id="better-world-input"></textarea>
+                            <textarea class="input-field" id="better-world-input-zh"></textarea>
                         </div>
                     </div>
                 </div>
@@ -943,32 +1026,32 @@
                 
                 <div class="input-area">
                     <label class="input-label">我做过的最明智的决定是...：</label>
-                    <textarea class="input-field" id="wise-decision-input"></textarea>
+                    <textarea class="input-field" id="wise-decision-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">我学到的最宝贵的一课是...：</label>
-                    <textarea class="input-field" id="lesson-learned-input"></textarea>
+                    <textarea class="input-field" id="lesson-learned-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">我承担的最大的风险是...：</label>
-                    <textarea class="input-field" id="biggest-risk-input"></textarea>
+                    <textarea class="input-field" id="biggest-risk-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">这一年给我最大的惊喜是...：</label>
-                    <textarea class="input-field" id="biggest-surprise-input"></textarea>
+                    <textarea class="input-field" id="biggest-surprise-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">我为他人做的最重要的事情是...：</label>
-                    <textarea class="input-field" id="for-others-input"></textarea>
+                    <textarea class="input-field" id="for-others-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">我所完成的最大的事情是...：</label>
-                    <textarea class="input-field" id="biggest-accomplishment-input"></textarea>
+                    <textarea class="input-field" id="biggest-accomplishment-input-zh"></textarea>
                 </div>
             </div>
             
@@ -988,44 +1071,44 @@
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">个人生活：家庭</label>
-                            <textarea class="input-field" id="new-year-personal-input"></textarea>
+                            <textarea class="input-field" id="new-year-personal-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">朋友：社群</label>
-                            <textarea class="input-field" id="new-year-friends-input"></textarea>
+                            <textarea class="input-field" id="new-year-friends-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">身体健康</label>
-                            <textarea class="input-field" id="new-year-physical-input"></textarea>
+                            <textarea class="input-field" id="new-year-physical-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">那些定义你的习惯</label>
-                            <textarea class="input-field" id="new-year-habits-input"></textarea>
+                            <textarea class="input-field" id="new-year-habits-input-zh"></textarea>
                         </div>
                     </div>
                     
                     <div class="flex-item">
                         <div class="input-area">
                             <label class="input-label">事业：学业</label>
-                            <textarea class="input-field" id="new-year-career-input"></textarea>
+                            <textarea class="input-field" id="new-year-career-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">休闲：爱好：创造力</label>
-                            <textarea class="input-field" id="new-year-hobbies-input"></textarea>
+                            <textarea class="input-field" id="new-year-hobbies-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">心理健康：自我认知</label>
-                            <textarea class="input-field" id="new-year-mental-input"></textarea>
+                            <textarea class="input-field" id="new-year-mental-input-zh"></textarea>
                         </div>
                         
                         <div class="input-area">
                             <label class="input-label">明天会更好*<br><small>*接下来的一年你会做什么来让这个世界变得更好？</small></label>
-                            <textarea class="input-field" id="new-year-better-world-input"></textarea>
+                            <textarea class="input-field" id="new-year-better-world-input-zh"></textarea>
                         </div>
                     </div>
                 </div>
@@ -1045,7 +1128,7 @@
                     你新的一年是什么样的？理想的情况下会发生什么？为什么会很好？写下来，画出来，放下预期，敢于梦想。
                 </div>
                 <div class="input-area">
-                    <textarea class="input-field" id="dream-input" placeholder="在这里写下你的梦想..." rows="6"></textarea>
+                    <textarea class="input-field" id="dream-input-zh" placeholder="在这里写下你的梦想..." rows="6"></textarea>
                 </div>
             </div>
             
@@ -1056,32 +1139,32 @@
                 
                 <div class="input-area">
                     <label class="input-label">最让你自豪的是什么？</label>
-                    <textarea class="input-field" id="proud-input"></textarea>
+                    <textarea class="input-field" id="proud-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">对你影响最大的三个人是谁？</label>
-                    <textarea class="input-field" id="influenced-by-input"></textarea>
+                    <textarea class="input-field" id="influenced-by-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">你影响最大的三个人是谁？</label>
-                    <textarea class="input-field" id="influenced-others-input"></textarea>
+                    <textarea class="input-field" id="influenced-others-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">有哪些事情是你未能完成的？</label>
-                    <textarea class="input-field" id="unfinished-input"></textarea>
+                    <textarea class="input-field" id="unfinished-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">你所发现的自己最大的闪光点是什么？</label>
-                    <textarea class="input-field" id="strength-input"></textarea>
+                    <textarea class="input-field" id="strength-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">最让你感恩的是什么？</label>
-                    <textarea class="input-field" id="grateful-input"></textarea>
+                    <textarea class="input-field" id="grateful-input-zh"></textarea>
                 </div>
             </div>
         </div>
@@ -1099,7 +1182,7 @@
                     描述去年最棒的和最难忘的，最快乐的时刻。在这里画下来。当时你感觉如何？谁在你身边？你当时在做什么？你记得哪些气味、声响或味道？
                 </div>
                 <div class="input-area">
-                    <textarea class="input-field" id="best-moment-input" placeholder="描述你的最佳时刻..." rows="8"></textarea>
+                    <textarea class="input-field" id="best-moment-input-zh" placeholder="描述你的最佳时刻..." rows="8"></textarea>
                 </div>
             </div>
             
@@ -1125,14 +1208,15 @@
             </div>
             
             <div class="year-nav">
-                <span>2015</span> | <span>2026</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
             </div>
             
             <div class="section">
                 <div class="subsection-title">代表过去一年的三个词</div>
                 <div class="content">选择三个词来表示你的过去一年</div>
                 <div class="input-area">
-                    <textarea class="input-field" id="three-words-input"></textarea>
+                    <textarea class="input-field" id="three-words-input-zh"></textarea>
                 </div>
             </div>
             
@@ -1140,7 +1224,7 @@
                 <div class="subsection-title">代表过去一年的书</div>
                 <div class="content">如果把过去的一年用一个书籍或电影来呈现，你会怎么命名它？</div>
                 <div class="input-area">
-                    <textarea class="input-field" id="book-movie-input"></textarea>
+                    <textarea class="input-field" id="book-movie-input-zh"></textarea>
                 </div>
             </div>
             
@@ -1148,7 +1232,7 @@
                 <div class="subsection-title">向过去一年道别</div>
                 <div class="content">如果还有什么事情你想写下来，或者你想对有些人说再见，请记在下面。</div>
                 <div class="input-area">
-                    <textarea class="input-field" id="goodbye-input"></textarea>
+                    <textarea class="input-field" id="goodbye-input-zh"></textarea>
                 </div>
             </div>
             
@@ -1167,17 +1251,17 @@
                 <div class="subsection-title">我完成的三大成就</div>
                 <div class="content">在这里列出去年你的三项最大成就</div>
                 <div class="input-area">
-                    <textarea class="input-field" id="achievements-input"></textarea>
+                    <textarea class="input-field" id="achievements-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">你做了哪些事情才让这些成就得以实现？</label>
-                    <textarea class="input-field" id="how-achieved-input"></textarea>
+                    <textarea class="input-field" id="how-achieved-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">谁帮助你取得了这些成就？怎样帮助的？</label>
-                    <textarea class="input-field" id="who-helped-input"></textarea>
+                    <textarea class="input-field" id="who-helped-input-zh"></textarea>
                 </div>
             </div>
             
@@ -1185,17 +1269,17 @@
                 <div class="subsection-title">我面对的三大挑战</div>
                 <div class="content">在这里列出去年你面对的三个最大挑战</div>
                 <div class="input-area">
-                    <textarea class="input-field" id="challenges-input"></textarea>
+                    <textarea class="input-field" id="challenges-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">是谁或是什么帮助你战胜了这些挑战？</label>
-                    <textarea class="input-field" id="challenge-help-input"></textarea>
+                    <textarea class="input-field" id="challenge-help-input-zh"></textarea>
                 </div>
                 
                 <div class="input-area">
                     <label class="input-label">在战胜这些挑战过程中，你从自身学到了什么？</label>
-                    <textarea class="input-field" id="learned-from-challenges-input"></textarea>
+                    <textarea class="input-field" id="learned-from-challenges-input-zh"></textarea>
                 </div>
             </div>
             
@@ -1217,7 +1301,7 @@
                     过去一年是否有让你无法释怀的事情发生？让你感觉不舒服的行为或者话语？或者你对自己感到生气？写在下面，为了你自己，原谅吧。
                 </div>
                 <div class="input-area">
-                    <textarea class="input-field" id="forgiveness-input" rows="6"></textarea>
+                    <textarea class="input-field" id="forgiveness-input-zh" rows="6"></textarea>
                 </div>
                 <div class="note">
                     *如果你还没有准备好去原谅，还是可以记住这里。这或许有帮助。
@@ -1232,7 +1316,7 @@
                     你还有什么想说的话吗？是否有些东西你需要在新的一年开始前放手？画出来或写下来，想一想，然后把它们都放下。
                 </div>
                 <div class="input-area">
-                    <textarea class="input-field" id="let-go-complete-input" rows="6"></textarea>
+                    <textarea class="input-field" id="let-go-complete-input-zh" rows="6"></textarea>
                 </div>
             </div>
             
@@ -1243,120 +1327,1088 @@
             </div>
             
             <div class="year-nav" style="margin-top: 30px;">
-                <span>2015</span> | <span>2026</span>
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 英文版容器 -->
+    <div class="container" id="englishVersion" style="display: none;">
+        <!-- 页面头部 -->
+        <div class="header">
+            <div class="title">
+                <svg class="title-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#9370db"/>
+                    <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM13 16H11V14H13V16ZM13 13H11V7H13V13Z" fill="#8a2be2"/>
+                </svg>
+                YearCompass Annual Handbook
+            </div>
+            <button class="export-btn" id="exportBtn-en">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z" fill="white"/>
+                </svg>
+                Export to Excel
+            </button>
+        </div>
+        
+        <!-- 页面1：封面 - 修改3：更改标题 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">Data saved locally, not available in incognito mode</div>
+                <div class="page-number">Page 1</div>
+            </div>
+            
+            <div class="year-nav">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> < | > <span>2026</span>
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 26px; font-weight: 700; margin: 30px 0; color: #b19cd9; text-shadow: 0 0 10px rgba(177, 156, 217, 0.5);">
+                The New Year
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; margin: 30px 0; color: #d8bfd8;">
+                I believe anything is possible this year
+            </div>
+            
+            <div class="input-area">
+                <label class="input-label">Date:</label>
+                <input type="text" class="input-field" id="date-input-en" placeholder="Please enter the date">
+            </div>
+            
+            <div class="input-area">
+                <label class="input-label">Signature:</label>
+                <input type="text" class="input-field" id="signature-input-en" placeholder="Please sign here">
+            </div>
+            
+            <div class="note">
+                Made with love by an international team in Budapest, Hungary: https://yearcompass.com
+            </div>
+        </div>
+        
+        <!-- 页面2：欢迎 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">Welcome</div>
+                <div class="page-number">Page 2</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">What is this?</div>
+                <div class="content">
+                    This is a YearCompass—to be precise, your own YearCompass.
+                    This is a booklet that helps you look back on the past year and plan for the new one. YearCompass helps you uncover your lifestyle through detailed questions and exercises, designing a wonderful year for you.
+                    This booklet is divided into two parts: The first part helps you look back on the previous year, learn from it, and celebrate your achievements; the second part is about the future, where you'll envision and plan for the coming year, preparing for the new year.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">What do I need to fill out this booklet?</div>
+                <div class="content">
+                    A pen, a few undisturbed hours, and an open and honest heart.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Can I do it with a group?</div>
+                <div class="content">
+                    Of course! Find a comfortable place, gather your friends, and help them print out the booklet. Everyone should fill out their own YearCompass. But you can discuss these exercises during short breaks, sharing thoughts and feelings.
+                    If you do this, please respect each other's boundaries. Everyone should only share what they feel comfortable sharing.
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="year-nav">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> * | * <span>2026</span>
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 20px 0; color: #b19cd9;">
+                The New Year
+            </div>
+            
+            <div class="input-area">
+                <label class="input-label">My word for the new year:</label>
+                <input type="text" class="input-field" id="word-input-en" placeholder="Choose a word to represent the new year. When you need extra energy, look back at this word; it will remind you not to give up on your dreams.">
+            </div>
+            
+            <div class="input-area">
+                <label class="input-label">Secret wish:</label>
+                <textarea class="input-field" id="wish-input-en" placeholder="Use your imagination, what's your secret wish for the new year?"></textarea>
+            </div>
+            
+            <div class="highlight-box">
+                <div style="font-size: 18px; font-weight: 600; color: #d8bfd8; margin-bottom: 10px;">✦ Congratulations, you've just planned your new year!</div>
+                Take a photo and share it with us using the #yearcompass tag.
+            </div>
+        </div>
+        
+        <!-- 页面3：新的一年 & 做好准备 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The New Year & Preparation</div>
+                <div class="page-number">Page 3</div>
+            </div>
+            
+            <div class="year-nav">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> * | * <span>2026</span>
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                The New Year
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 18px; margin: 15px 0; color: #d8bfd8;">
+                Six Sentences About the New Year
+            </div>
+            
+            <div class="flex-container">
+                <div class="flex-item">
+                    <div class="input-area">
+                        <label class="input-label">This year I will no longer procrastinate on...</label>
+                        <textarea class="input-field" id="procrastination-input-en"></textarea>
+                    </div>
+                    
+                    <div class="input-area">
+                        <label class="input-label">This year I will draw the most energy from...</label>
+                        <textarea class="input-field" id="energy-input-en"></textarea>
+                    </div>
+                    
+                    <div class="input-area">
+                        <label class="input-label">This year I will say yes when...</label>
+                        <textarea class="input-field" id="agree-input-en"></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex-item">
+                    <div class="input-area">
+                        <label class="input-label">This year I will be bravest when...</label>
+                        <textarea class="input-field" id="brave-input-en"></textarea>
+                    </div>
+                    
+                    <div class="input-area">
+                        <label class="input-label">This year I will advise myself to...</label>
+                        <textarea class="input-field" id="advice-input-en"></textarea>
+                    </div>
+                    
+                    <div class="input-area">
+                        <label class="input-label">This year is special to me because...</label>
+                        <textarea class="input-field" id="special-input-en"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                Preparation
+            </div>
+            
+            <div class="highlight-box">
+                <div style="font-size: 17px; line-height: 1.8; color: #e0e0ff;">
+                    <div>✦ Come to the right place</div>
+                    <div>✦ Prepare your tools and space,</div>
+                    <div>✦ Close your eyes, take five deep breaths,</div>
+                    <div>✦ Let go of your expectations.</div>
+                    <div style="margin-top: 10px; font-weight: 600; color: #d8bfd8;">Start when you're ready.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面4：过去这一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The Past Year</div>
+                <div class="page-number">Page 4</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Review Your Calendar</div>
+                <div class="content">
+                    Open last year's calendar and review each week. If you see an important event, whether it's a family gathering, friend meetup, or meaningful project, write it here.
+                </div>
+                <div class="input-area">
+                    <textarea class="input-field" id="calendar-review-input-en" placeholder="Record important events from the past year"></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Magical "Three" for the New Year</div>
+                
+                <div class="flex-container">
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Two things that make my surroundings comfortable:</label>
+                            <textarea class="input-field" id="comfort-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three ways I will regularly release myself:</label>
+                            <textarea class="input-field" id="release-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three gifts I will reward myself with for success:</label>
+                            <textarea class="input-field" id="reward-input-en"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Three things I do every morning:</label>
+                            <textarea class="input-field" id="morning-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three places I will go:</label>
+                            <textarea class="input-field" id="places-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three ways I will connect with people I love:</label>
+                            <textarea class="input-field" id="connect-input-en"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面5：新的一年 & 过去这一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The New Year & The Past Year</div>
+                <div class="page-number">Page 5</div>
+            </div>
+            
+            <div class="year-nav">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
+            </div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                The New Year
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">Magical "Three" for the New Year</div>
+                
+                <div class="flex-container">
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Three things I like most about myself:</label>
+                            <textarea class="input-field" id="like-about-me-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three things I most want to achieve:</label>
+                            <textarea class="input-field" id="want-to-do-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three things I have the courage to say no to:</label>
+                            <textarea class="input-field" id="say-no-input-en"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Three things I'm ready to let go of:</label>
+                            <textarea class="input-field" id="let-go-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three people who can be my pillars in difficult times:</label>
+                            <textarea class="input-field" id="support-people-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Three directions I want to explore:</label>
+                            <textarea class="input-field" id="explore-input-en"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                The Past Year
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">This Was My Past Year</div>
+                <div class="content">
+                    Our lives are composed of different but interconnected parts. Look at the following areas and ask yourself what important events happened in each. Write your answers.
+                </div>
+                
+                <div class="flex-container">
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Personal Life: Family</label>
+                            <textarea class="input-field" id="personal-life-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Friends: Community</label>
+                            <textarea class="input-field" id="friends-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Leisure: Hobbies: Creativity</label>
+                            <textarea class="input-field" id="hobbies-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Mental Health: Self-awareness</label>
+                            <textarea class="input-field" id="mental-health-input-en"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Career: Studies</label>
+                            <textarea class="input-field" id="career-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Physical Health</label>
+                            <textarea class="input-field" id="physical-health-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Habits That Define You</label>
+                            <textarea class="input-field" id="habits-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Tomorrow Will Be Better*<br><small>*What did you do this year to make the world a better place?</small></label>
+                            <textarea class="input-field" id="better-world-input-en"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面6：过去这一年 & 新的一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The Past Year & The New Year</div>
+                <div class="page-number">Page 6</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Summarize My Past Year in Six Sentences</div>
+                
+                <div class="input-area">
+                    <label class="input-label">The wisest decision I made was...</label>
+                    <textarea class="input-field" id="wise-decision-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">The most valuable lesson I learned was...</label>
+                    <textarea class="input-field" id="lesson-learned-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">The biggest risk I took was...</label>
+                    <textarea class="input-field" id="biggest-risk-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">The biggest surprise this year was...</label>
+                    <textarea class="input-field" id="biggest-surprise-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">The most important thing I did for others was...</label>
+                    <textarea class="input-field" id="for-others-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">The biggest thing I accomplished was...</label>
+                    <textarea class="input-field" id="biggest-accomplishment-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                The New Year
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">My New Year Will Be</div>
+                <div class="content">
+                    Look at the various areas of your life and set goals for each area for next year. Write these goals on this page; this will be your first step toward achieving them.
+                </div>
+                
+                <div class="flex-container">
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Personal Life: Family</label>
+                            <textarea class="input-field" id="new-year-personal-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Friends: Community</label>
+                            <textarea class="input-field" id="new-year-friends-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Physical Health</label>
+                            <textarea class="input-field" id="new-year-physical-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Habits That Define You</label>
+                            <textarea class="input-field" id="new-year-habits-input-en"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-item">
+                        <div class="input-area">
+                            <label class="input-label">Career: Studies</label>
+                            <textarea class="input-field" id="new-year-career-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Leisure: Hobbies: Creativity</label>
+                            <textarea class="input-field" id="new-year-hobbies-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Mental Health: Self-awareness</label>
+                            <textarea class="input-field" id="new-year-mental-input-en"></textarea>
+                        </div>
+                        
+                        <div class="input-area">
+                            <label class="input-label">Tomorrow Will Be Better*<br><small>*What will you do next year to make the world a better place?</small></label>
+                            <textarea class="input-field" id="new-year-better-world-input-en"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面7：新的一年 & 过去这一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The New Year & The Past Year</div>
+                <div class="page-number">Page 7</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Dream Boldly</div>
+                <div class="content">
+                    What is your new year like? Ideally, what would happen? Why would it be good? Write it down, draw it, let go of expectations, dare to dream.
+                </div>
+                <div class="input-area">
+                    <textarea class="input-field" id="dream-input-en" placeholder="Write your dreams here..." rows="6"></textarea>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="section">
+                <div class="section-title">Summarize My Past Year with Six Questions</div>
+                
+                <div class="input-area">
+                    <label class="input-label">What are you most proud of?</label>
+                    <textarea class="input-field" id="proud-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">Who were the three people who influenced you most?</label>
+                    <textarea class="input-field" id="influenced-by-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">Who were the three people you influenced most?</label>
+                    <textarea class="input-field" id="influenced-others-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">What things did you leave unfinished?</label>
+                    <textarea class="input-field" id="unfinished-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">What was your greatest strength you discovered about yourself?</label>
+                    <textarea class="input-field" id="strength-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">What are you most grateful for?</label>
+                    <textarea class="input-field" id="grateful-input-en"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面8：过去这一年 & 新的一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The Past Year & The New Year</div>
+                <div class="page-number">Page 8</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Best Moment</div>
+                <div class="content">
+                    Describe the best, most memorable, happiest moment of last year. Draw it here. How did you feel? Who was with you? What were you doing? What scents, sounds, or tastes do you remember?
+                </div>
+                <div class="input-area">
+                    <textarea class="input-field" id="best-moment-input-en" placeholder="Describe your best moment..." rows="8"></textarea>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="content" style="text-align: center; font-size: 22px; font-weight: 700; margin: 15px 0; color: #b19cd9;">
+                The New Year
+            </div>
+            
+            <div class="highlight-box" style="text-align: center; padding: 25px;">
+                <div style="font-size: 20px; margin-bottom: 15px; color: #d8bfd8;">✦ YearCompass ✦</div>
+                <div class="year-nav">
+                    <span>2025</span> | <span>2026</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页面9：过去这一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The Past Year</div>
+                <div class="page-number">Page 9</div>
+            </div>
+            
+            <div class="year-nav">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">Three Words Representing the Past Year</div>
+                <div class="content">Choose three words to represent your past year</div>
+                <div class="input-area">
+                    <textarea class="input-field" id="three-words-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">Book Representing the Past Year</div>
+                <div class="content">If the past year were presented as a book or movie, what would you name it?</div>
+                <div class="input-area">
+                    <textarea class="input-field" id="book-movie-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">Say Goodbye to the Past Year</div>
+                <div class="content">If there's anything else you want to write down, or you want to say goodbye to some people, please note it below.</div>
+                <div class="input-area">
+                    <textarea class="input-field" id="goodbye-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="highlight-box" style="text-align: center; padding: 20px;">
+                <div style="font-size: 18px; line-height: 1.8; color: #e0e0ff;">
+                    <div>✦ The past year has ended</div>
+                    <div>✦ You have completed Part 1</div>
+                    <div>✦ Take a deep breath</div>
+                    <div style="font-weight: 600; color: #d8bfd8; margin-top: 5px;">✦ Take a break</div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="section">
+                <div class="subsection-title">My Three Biggest Achievements</div>
+                <div class="content">List your three biggest achievements from last year here</div>
+                <div class="input-area">
+                    <textarea class="input-field" id="achievements-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">What did you do to make these achievements possible?</label>
+                    <textarea class="input-field" id="how-achieved-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">Who helped you achieve these achievements? How?</label>
+                    <textarea class="input-field" id="who-helped-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="subsection-title">My Three Biggest Challenges</div>
+                <div class="content">List the three biggest challenges you faced last year here</div>
+                <div class="input-area">
+                    <textarea class="input-field" id="challenges-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">Who or what helped you overcome these challenges?</label>
+                    <textarea class="input-field" id="challenge-help-input-en"></textarea>
+                </div>
+                
+                <div class="input-area">
+                    <label class="input-label">What did you learn about yourself while overcoming these challenges?</label>
+                    <textarea class="input-field" id="learned-from-challenges-input-en"></textarea>
+                </div>
+            </div>
+            
+            <div class="note">
+                Do you like YearCompass? Share us with your friends! Please help us help as many people as possible. https://yearcompass.com
+            </div>
+        </div>
+        
+        <!-- 页面10：过去这一年 -->
+        <div class="card">
+            <div class="page-header">
+                <div class="page-title">The Past Year</div>
+                <div class="page-number">Page 10</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Forgiveness</div>
+                <div class="content">
+                    Did anything happen in the past year that you can't let go of? Words or actions that made you uncomfortable? Or are you angry with yourself? Write it below, and for your own sake, forgive.
+                </div>
+                <div class="input-area">
+                    <textarea class="input-field" id="forgiveness-input-en" rows="6"></textarea>
+                </div>
+                <div class="note">
+                    *If you're not ready to forgive yet, you can still note it here. This might help.
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="section">
+                <div class="section-title">Letting Go</div>
+                <div class="content">
+                    Is there anything else you want to say? Is there something you need to let go of before the new year begins? Draw or write it down, think about it, then let it all go.
+                </div>
+                <div class="input-area">
+                    <textarea class="input-field" id="let-go-complete-input-en" rows="6"></textarea>
+                </div>
+            </div>
+            
+            <!-- 修改3：添加许可证信息 -->
+            <div class="license-info">
+                This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License<br>
+                © 2026 YearCompass | Made with love by an international team in Budapest, Hungary
+            </div>
+            
+            <div class="year-nav" style="margin-top: 30px;">
+                <!-- 修改5：将2015改为2025 -->
+                <span>2025</span> | <span>2026</span>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        // 语言切换功能
+        const languageSelect = document.getElementById('languageSelect');
+        const chineseVersion = document.getElementById('chineseVersion');
+        const englishVersion = document.getElementById('englishVersion');
+        
+        // 初始化语言设置
+        let currentLanguage = localStorage.getItem('yearcompass_language') || 'zh';
+        languageSelect.value = currentLanguage;
+        
+        // 根据当前语言显示对应版本
+        function setLanguage(lang) {
+            if (lang === 'zh') {
+                chineseVersion.style.display = 'block';
+                englishVersion.style.display = 'none';
+            } else {
+                chineseVersion.style.display = 'none';
+                englishVersion.style.display = 'block';
+            }
+            localStorage.setItem('yearcompass_language', lang);
+        }
+        
+        // 语言切换事件监听
+        languageSelect.addEventListener('change', function() {
+            setLanguage(this.value);
+        });
+        
+        // 初始化语言
+        setLanguage(currentLanguage);
+        
         // YearCompass导出功能
         document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+        document.getElementById('exportBtn-en').addEventListener('click', exportToExcel);
         
+        // LocalStorage状态提示元素
+        const saveStatus = document.getElementById('saveStatus');
+        
+        // 显示保存状态提示
+        function showSaveStatus(message = "内容已自动保存") {
+            saveStatus.textContent = message;
+            saveStatus.classList.add('show');
+            
+            setTimeout(() => {
+                saveStatus.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 保存数据到LocalStorage
+        function saveToLocalStorage(key, value) {
+            try {
+                localStorage.setItem(`yearcompass_${key}`, value);
+                // 只在用户交互时显示提示，避免初始加载时显示
+                if (key !== 'initial_load') {
+                    showSaveStatus();
+                }
+            } catch (e) {
+                console.error('保存到LocalStorage失败:', e);
+                showSaveStatus("保存失败，请检查是否在隐身模式下");
+            }
+        }
+        
+        // 从LocalStorage加载数据
+        function loadFromLocalStorage() {
+            const inputFields = document.querySelectorAll('.input-field');
+            let loadedCount = 0;
+            
+            inputFields.forEach(field => {
+                if (field.id) {
+                    const savedValue = localStorage.getItem(`yearcompass_${field.id}`);
+                    if (savedValue !== null) {
+                        field.value = savedValue;
+                        loadedCount++;
+                    }
+                }
+            });
+            
+            // 显示加载了多少条数据
+            if (loadedCount > 0) {
+                showSaveStatus(`已加载 ${loadedCount} 条保存的数据`);
+            }
+        }
+        
+        // 清除所有LocalStorage数据
+        function clearLocalStorage() {
+            if (confirm('确定要清除所有已保存的数据吗？此操作不可撤销。')) {
+                const keysToRemove = [];
+                
+                // 收集所有yearcompass相关的key
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('yearcompass_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                // 删除所有相关key
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                // 清空所有输入框
+                const inputFields = document.querySelectorAll('.input-field');
+                inputFields.forEach(field => {
+                    field.value = '';
+                });
+                
+                // 重新设置当前日期
+                const today = new Date();
+                const formattedDate = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+                document.getElementById('date-input-zh').value = formattedDate;
+                document.getElementById('date-input-en').value = formattedDate.split('年').join('/').split('月').join('/').split('日').join('');
+                
+                showSaveStatus('所有数据已清除');
+            }
+        }
+        
+        // 自动填充当前日期
+        function setDefaultDate() {
+            const today = new Date();
+            const formattedDateZH = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+            const formattedDateEN = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
+            
+            const dateInputZH = document.getElementById('date-input-zh');
+            const dateInputEN = document.getElementById('date-input-en');
+            
+            // 只有在没有保存的值时才设置默认日期
+            if (!localStorage.getItem(`yearcompass_date-input-zh`)) {
+                dateInputZH.value = formattedDateZH;
+                saveToLocalStorage('date-input-zh', formattedDateZH);
+            }
+            
+            if (!localStorage.getItem(`yearcompass_date-input-en`)) {
+                dateInputEN.value = formattedDateEN;
+                saveToLocalStorage('date-input-en', formattedDateEN);
+            }
+        }
+        
+        // 为所有输入框添加事件监听
+        function setupInputListeners() {
+            const inputFields = document.querySelectorAll('.input-field');
+            
+            inputFields.forEach(field => {
+                field.addEventListener('input', function() {
+                    saveToLocalStorage(this.id, this.value);
+                });
+                
+                // 为文本区域添加防抖，避免频繁保存
+                if (field.tagName === 'TEXTAREA') {
+                    let timeoutId;
+                    field.addEventListener('input', function() {
+                        clearTimeout(timeoutId);
+                        timeoutId = setTimeout(() => {
+                            saveToLocalStorage(this.id, this.value);
+                        }, 500);
+                    });
+                }
+            });
+        }
+        
+        // 初始化
+        function init() {
+            // 加载保存的数据
+            loadFromLocalStorage();
+            
+            // 设置默认日期（如果没有保存的数据）
+            setDefaultDate();
+            
+            // 设置输入监听
+            setupInputListeners();
+            
+            // 绑定清除数据按钮
+            document.getElementById('clearDataBtn').addEventListener('click', clearLocalStorage);
+            
+            // 页面加载完成提示
+            setTimeout(() => {
+                showSaveStatus('页面已加载，输入内容将自动保存');
+            }, 1000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // 导出Excel功能
         function exportToExcel() {
-            // 收集所有输入字段的值
-            const data = [
-                ["YearCompass 年度手册 - 用户填写结果", "", "", ""],
-                ["导出时间:", new Date().toLocaleString(), "", ""],
-                ["", "", "", ""],
-                ["=== 封面 ===", "", "", ""],
-                ["日期:", document.getElementById('date-input').value, "", ""],
-                ["签名:", document.getElementById('signature-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 新的一年 - 代表词汇和心愿 ===", "", "", ""],
-                ["今年我的代表词汇:", document.getElementById('word-input').value, "", ""],
-                ["秘密心愿:", document.getElementById('wish-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 关于新年的六句话 ===", "", "", ""],
-                ["今年我不会再在...上拖延:", document.getElementById('procrastination-input').value, "", ""],
-                ["今年我会从...上汲取最大的能量:", document.getElementById('energy-input').value, "", ""],
-                ["今年当...时我会变得最勇敢:", document.getElementById('brave-input').value, "", ""],
-                ["今年...时我会答应:", document.getElementById('agree-input').value, "", ""],
-                ["今年我会建议自己...:", document.getElementById('advice-input').value, "", ""],
-                ["今年对我很特别，因为...:", document.getElementById('special-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 回顾你的日程表 ===", "", "", ""],
-                ["重要事件:", document.getElementById('calendar-review-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 新年的魔法'三' ===", "", "", ""],
-                ["让我周围环境变得舒适的二样东西:", document.getElementById('comfort-input').value, "", ""],
-                ["我每天早晨都会做的工作事:", document.getElementById('morning-input').value, "", ""],
-                ["我会定期通过这三个方式释放一下自己:", document.getElementById('release-input').value, "", ""],
-                ["我会去这三个地方:", document.getElementById('places-input').value, "", ""],
-                ["我会通过这三种方式联结我爱的人:", document.getElementById('connect-input').value, "", ""],
-                ["我会用这三个礼物奖赏自己的成功:", document.getElementById('reward-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 新年中的魔法'三' ===", "", "", ""],
-                ["我最喜欢的三件关于自己的事:", document.getElementById('like-about-me-input').value, "", ""],
-                ["三件我准备好放手的事:", document.getElementById('let-go-input').value, "", ""],
-                ["我最想做到的三件事:", document.getElementById('want-to-do-input').value, "", ""],
-                ["在我困难时可以成为支柱的三个人:", document.getElementById('support-people-input').value, "", ""],
-                ["我要去探索的三个方向:", document.getElementById('explore-input').value, "", ""],
-                ["我有勇气说不的三件事:", document.getElementById('say-no-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 过去这一年 - 各个领域 ===", "", "", ""],
-                ["个人生活：家庭:", document.getElementById('personal-life-input').value, "", ""],
-                ["事业：学业:", document.getElementById('career-input').value, "", ""],
-                ["朋友：社群:", document.getElementById('friends-input').value, "", ""],
-                ["休闲：爱好：创造力:", document.getElementById('hobbies-input').value, "", ""],
-                ["身体健康:", document.getElementById('physical-health-input').value, "", ""],
-                ["心理健康：自我认知:", document.getElementById('mental-health-input').value, "", ""],
-                ["那些定义你的习惯:", document.getElementById('habits-input').value, "", ""],
-                ["今年你做了什么，让世界变得更好？:", document.getElementById('better-world-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 用六句话总结我过去的一年 ===", "", "", ""],
-                ["我做过的最明智的决定是...:", document.getElementById('wise-decision-input').value, "", ""],
-                ["我学到的最宝贵的一课是...:", document.getElementById('lesson-learned-input').value, "", ""],
-                ["我承担的最大的风险是...:", document.getElementById('biggest-risk-input').value, "", ""],
-                ["这一年给我最大的惊喜是...:", document.getElementById('biggest-surprise-input').value, "", ""],
-                ["我为他人做的最重要的事情是...:", document.getElementById('for-others-input').value, "", ""],
-                ["我所完成的最大的事情是...:", document.getElementById('biggest-accomplishment-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 我新的一年将会是 ===", "", "", ""],
-                ["个人生活：家庭:", document.getElementById('new-year-personal-input').value, "", ""],
-                ["事业：学业:", document.getElementById('new-year-career-input').value, "", ""],
-                ["朋友：社群:", document.getElementById('new-year-friends-input').value, "", ""],
-                ["休闲：爱好：创造力:", document.getElementById('new-year-hobbies-input').value, "", ""],
-                ["身体健康:", document.getElementById('new-year-physical-input').value, "", ""],
-                ["心理健康：自我认知:", document.getElementById('new-year-mental-input').value, "", ""],
-                ["那些定义你的习惯:", document.getElementById('new-year-habits-input').value, "", ""],
-                ["接下来的一年你会做什么来让这个世界变得更好？:", document.getElementById('new-year-better-world-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 大胆去梦想 ===", "", "", ""],
-                ["梦想:", document.getElementById('dream-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 用六个问题总结我过去的一年 ===", "", "", ""],
-                ["最让你自豪的是什么？:", document.getElementById('proud-input').value, "", ""],
-                ["对你影响最大的三个人是谁？:", document.getElementById('influenced-by-input').value, "", ""],
-                ["你影响最大的三个人是谁？:", document.getElementById('influenced-others-input').value, "", ""],
-                ["有哪些事情是你未能完成的？:", document.getElementById('unfinished-input').value, "", ""],
-                ["你所发现的自己最大的闪光点是什么？:", document.getElementById('strength-input').value, "", ""],
-                ["最让你感恩的是什么？:", document.getElementById('grateful-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 最佳时刻 ===", "", "", ""],
-                ["最佳时刻描述:", document.getElementById('best-moment-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 代表过去一年的三个词和书 ===", "", "", ""],
-                ["代表过去一年的三个词:", document.getElementById('three-words-input').value, "", ""],
-                ["代表过去一年的书/电影名称:", document.getElementById('book-movie-input').value, "", ""],
-                ["向过去一年道别:", document.getElementById('goodbye-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 我完成的三大成就 ===", "", "", ""],
-                ["三大成就:", document.getElementById('achievements-input').value, "", ""],
-                ["如何实现这些成就:", document.getElementById('how-achieved-input').value, "", ""],
-                ["谁帮助了你:", document.getElementById('who-helped-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 我面对的三大挑战 ===", "", "", ""],
-                ["三大挑战:", document.getElementById('challenges-input').value, "", ""],
-                ["谁/什么帮助你战胜挑战:", document.getElementById('challenge-help-input').value, "", ""],
-                ["从挑战中学到了什么:", document.getElementById('learned-from-challenges-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 谅解 ===", "", "", ""],
-                ["需要谅解的事情:", document.getElementById('forgiveness-input').value, "", ""],
-                ["", "", "", ""],
-                ["=== 放下 ===", "", "", ""],
-                ["需要放下的事情:", document.getElementById('let-go-complete-input').value, "", ""]
-            ];
+            // 确定当前语言
+            const currentLang = languageSelect.value;
+            let data;
+            
+            if (currentLang === 'zh') {
+                // 中文版数据
+                data = [
+                    ["YearCompass 年度手册 - 用户填写结果", "", "", ""],
+                    ["导出时间:", new Date().toLocaleString(), "", ""],
+                    ["", "", "", ""],
+                    ["=== 封面 ===", "", "", ""],
+                    ["日期:", document.getElementById('date-input-zh').value, "", ""],
+                    ["签名:", document.getElementById('signature-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 新的一年 - 代表词汇和心愿 ===", "", "", ""],
+                    ["今年我的代表词汇:", document.getElementById('word-input-zh').value, "", ""],
+                    ["秘密心愿:", document.getElementById('wish-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 关于新年的六句话 ===", "", "", ""],
+                    ["今年我不会再在...上拖延:", document.getElementById('procrastination-input-zh').value, "", ""],
+                    ["今年我会从...上汲取最大的能量:", document.getElementById('energy-input-zh').value, "", ""],
+                    ["今年当...时我会变得最勇敢:", document.getElementById('brave-input-zh').value, "", ""],
+                    ["今年...时我会答应:", document.getElementById('agree-input-zh').value, "", ""],
+                    ["今年我会建议自己...:", document.getElementById('advice-input-zh').value, "", ""],
+                    ["今年对我很特别，因为...:", document.getElementById('special-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 回顾你的日程表 ===", "", "", ""],
+                    ["重要事件:", document.getElementById('calendar-review-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 新年的魔法'三' ===", "", "", ""],
+                    ["让我周围环境变得舒适的二样东西:", document.getElementById('comfort-input-zh').value, "", ""],
+                    ["我每天早晨都会做的工作事:", document.getElementById('morning-input-zh').value, "", ""],
+                    ["我会定期通过这三个方式释放一下自己:", document.getElementById('release-input-zh').value, "", ""],
+                    ["我会去这三个地方:", document.getElementById('places-input-zh').value, "", ""],
+                    ["我会通过这三种方式联结我爱的人:", document.getElementById('connect-input-zh').value, "", ""],
+                    ["我会用这三个礼物奖赏自己的成功:", document.getElementById('reward-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 新年中的魔法'三' ===", "", "", ""],
+                    ["我最喜欢的三件关于自己的事:", document.getElementById('like-about-me-input-zh').value, "", ""],
+                    ["三件我准备好放手的事:", document.getElementById('let-go-input-zh').value, "", ""],
+                    ["我最想做到的三件事:", document.getElementById('want-to-do-input-zh').value, "", ""],
+                    ["在我困难时可以成为支柱的三个人:", document.getElementById('support-people-input-zh').value, "", ""],
+                    ["我要去探索的三个方向:", document.getElementById('explore-input-zh').value, "", ""],
+                    ["我有勇气说不的三件事:", document.getElementById('say-no-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 过去这一年 - 各个领域 ===", "", "", ""],
+                    ["个人生活：家庭:", document.getElementById('personal-life-input-zh').value, "", ""],
+                    ["事业：学业:", document.getElementById('career-input-zh').value, "", ""],
+                    ["朋友：社群:", document.getElementById('friends-input-zh').value, "", ""],
+                    ["休闲：爱好：创造力:", document.getElementById('hobbies-input-zh').value, "", ""],
+                    ["身体健康:", document.getElementById('physical-health-input-zh').value, "", ""],
+                    ["心理健康：自我认知:", document.getElementById('mental-health-input-zh').value, "", ""],
+                    ["那些定义你的习惯:", document.getElementById('habits-input-zh').value, "", ""],
+                    ["今年你做了什么，让世界变得更好？:", document.getElementById('better-world-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 用六句话总结我过去的一年 ===", "", "", ""],
+                    ["我做过的最明智的决定是...:", document.getElementById('wise-decision-input-zh').value, "", ""],
+                    ["我学到的最宝贵的一课是...:", document.getElementById('lesson-learned-input-zh').value, "", ""],
+                    ["我承担的最大的风险是...:", document.getElementById('biggest-risk-input-zh').value, "", ""],
+                    ["这一年给我最大的惊喜是...:", document.getElementById('biggest-surprise-input-zh').value, "", ""],
+                    ["我为他人做的最重要的事情是...:", document.getElementById('for-others-input-zh').value, "", ""],
+                    ["我所完成的最大的事情是...:", document.getElementById('biggest-accomplishment-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 我新的一年将会是 ===", "", "", ""],
+                    ["个人生活：家庭:", document.getElementById('new-year-personal-input-zh').value, "", ""],
+                    ["事业：学业:", document.getElementById('new-year-career-input-zh').value, "", ""],
+                    ["朋友：社群:", document.getElementById('new-year-friends-input-zh').value, "", ""],
+                    ["休闲：爱好：创造力:", document.getElementById('new-year-hobbies-input-zh').value, "", ""],
+                    ["身体健康:", document.getElementById('new-year-physical-input-zh').value, "", ""],
+                    ["心理健康：自我认知:", document.getElementById('new-year-mental-input-zh').value, "", ""],
+                    ["那些定义你的习惯:", document.getElementById('new-year-habits-input-zh').value, "", ""],
+                    ["接下来的一年你会做什么来让这个世界变得更好？:", document.getElementById('new-year-better-world-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 大胆去梦想 ===", "", "", ""],
+                    ["梦想:", document.getElementById('dream-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 用六个问题总结我过去的一年 ===", "", "", ""],
+                    ["最让你自豪的是什么？:", document.getElementById('proud-input-zh').value, "", ""],
+                    ["对你影响最大的三个人是谁？:", document.getElementById('influenced-by-input-zh').value, "", ""],
+                    ["你影响最大的三个人是谁？:", document.getElementById('influenced-others-input-zh').value, "", ""],
+                    ["有哪些事情是你未能完成的？:", document.getElementById('unfinished-input-zh').value, "", ""],
+                    ["你所发现的自己最大的闪光点是什么？:", document.getElementById('strength-input-zh').value, "", ""],
+                    ["最让你感恩的是什么？:", document.getElementById('grateful-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 最佳时刻 ===", "", "", ""],
+                    ["最佳时刻描述:", document.getElementById('best-moment-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 代表过去一年的三个词和书 ===", "", "", ""],
+                    ["代表过去一年的三个词:", document.getElementById('three-words-input-zh').value, "", ""],
+                    ["代表过去一年的书/电影名称:", document.getElementById('book-movie-input-zh').value, "", ""],
+                    ["向过去一年道别:", document.getElementById('goodbye-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 我完成的三大成就 ===", "", "", ""],
+                    ["三大成就:", document.getElementById('achievements-input-zh').value, "", ""],
+                    ["如何实现这些成就:", document.getElementById('how-achieved-input-zh').value, "", ""],
+                    ["谁帮助了你:", document.getElementById('who-helped-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 我面对的三大挑战 ===", "", "", ""],
+                    ["三大挑战:", document.getElementById('challenges-input-zh').value, "", ""],
+                    ["谁/什么帮助你战胜挑战:", document.getElementById('challenge-help-input-zh').value, "", ""],
+                    ["从挑战中学到了什么:", document.getElementById('learned-from-challenges-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 谅解 ===", "", "", ""],
+                    ["需要谅解的事情:", document.getElementById('forgiveness-input-zh').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== 放下 ===", "", "", ""],
+                    ["需要放下的事情:", document.getElementById('let-go-complete-input-zh').value, "", ""]
+                ];
+            } else {
+                // 英文版数据
+                data = [
+                    ["YearCompass Annual Handbook - User Input Results", "", "", ""],
+                    ["Export Time:", new Date().toLocaleString(), "", ""],
+                    ["", "", "", ""],
+                    ["=== Cover ===", "", "", ""],
+                    ["Date:", document.getElementById('date-input-en').value, "", ""],
+                    ["Signature:", document.getElementById('signature-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== The New Year - Word and Wish ===", "", "", ""],
+                    ["My word for the new year:", document.getElementById('word-input-en').value, "", ""],
+                    ["Secret wish:", document.getElementById('wish-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Six Sentences About the New Year ===", "", "", ""],
+                    ["This year I will no longer procrastinate on...:", document.getElementById('procrastination-input-en').value, "", ""],
+                    ["This year I will draw the most energy from...:", document.getElementById('energy-input-en').value, "", ""],
+                    ["This year I will be bravest when...:", document.getElementById('brave-input-en').value, "", ""],
+                    ["This year I will say yes when...:", document.getElementById('agree-input-en').value, "", ""],
+                    ["This year I will advise myself to...:", document.getElementById('advice-input-en').value, "", ""],
+                    ["This year is special to me because...:", document.getElementById('special-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Review Your Calendar ===", "", "", ""],
+                    ["Important events:", document.getElementById('calendar-review-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Magical 'Three' for the New Year ===", "", "", ""],
+                    ["Two things that make my surroundings comfortable:", document.getElementById('comfort-input-en').value, "", ""],
+                    ["Three things I do every morning:", document.getElementById('morning-input-en').value, "", ""],
+                    ["Three ways I will regularly release myself:", document.getElementById('release-input-en').value, "", ""],
+                    ["Three places I will go:", document.getElementById('places-input-en').value, "", ""],
+                    ["Three ways I will connect with people I love:", document.getElementById('connect-input-en').value, "", ""],
+                    ["Three gifts I will reward myself with for success:", document.getElementById('reward-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Magical 'Three' for the New Year ===", "", "", ""],
+                    ["Three things I like most about myself:", document.getElementById('like-about-me-input-en').value, "", ""],
+                    ["Three things I'm ready to let go of:", document.getElementById('let-go-input-en').value, "", ""],
+                    ["Three things I most want to achieve:", document.getElementById('want-to-do-input-en').value, "", ""],
+                    ["Three people who can be my pillars in difficult times:", document.getElementById('support-people-input-en').value, "", ""],
+                    ["Three directions I want to explore:", document.getElementById('explore-input-en').value, "", ""],
+                    ["Three things I have the courage to say no to:", document.getElementById('say-no-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== The Past Year - Various Areas ===", "", "", ""],
+                    ["Personal Life: Family:", document.getElementById('personal-life-input-en').value, "", ""],
+                    ["Career: Studies:", document.getElementById('career-input-en').value, "", ""],
+                    ["Friends: Community:", document.getElementById('friends-input-en').value, "", ""],
+                    ["Leisure: Hobbies: Creativity:", document.getElementById('hobbies-input-en').value, "", ""],
+                    ["Physical Health:", document.getElementById('physical-health-input-en').value, "", ""],
+                    ["Mental Health: Self-awareness:", document.getElementById('mental-health-input-en').value, "", ""],
+                    ["Habits That Define You:", document.getElementById('habits-input-en').value, "", ""],
+                    ["What did you do this year to make the world a better place?:", document.getElementById('better-world-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Summarize My Past Year in Six Sentences ===", "", "", ""],
+                    ["The wisest decision I made was...:", document.getElementById('wise-decision-input-en').value, "", ""],
+                    ["The most valuable lesson I learned was...:", document.getElementById('lesson-learned-input-en').value, "", ""],
+                    ["The biggest risk I took was...:", document.getElementById('biggest-risk-input-en').value, "", ""],
+                    ["The biggest surprise this year was...:", document.getElementById('biggest-surprise-input-en').value, "", ""],
+                    ["The most important thing I did for others was...:", document.getElementById('for-others-input-en').value, "", ""],
+                    ["The biggest thing I accomplished was...:", document.getElementById('biggest-accomplishment-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== My New Year Will Be ===", "", "", ""],
+                    ["Personal Life: Family:", document.getElementById('new-year-personal-input-en').value, "", ""],
+                    ["Career: Studies:", document.getElementById('new-year-career-input-en').value, "", ""],
+                    ["Friends: Community:", document.getElementById('new-year-friends-input-en').value, "", ""],
+                    ["Leisure: Hobbies: Creativity:", document.getElementById('new-year-hobbies-input-en').value, "", ""],
+                    ["Physical Health:", document.getElementById('new-year-physical-input-en').value, "", ""],
+                    ["Mental Health: Self-awareness:", document.getElementById('new-year-mental-input-en').value, "", ""],
+                    ["Habits That Define You:", document.getElementById('new-year-habits-input-en').value, "", ""],
+                    ["What will you do next year to make the world a better place?:", document.getElementById('new-year-better-world-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Dream Boldly ===", "", "", ""],
+                    ["Dreams:", document.getElementById('dream-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Summarize My Past Year with Six Questions ===", "", "", ""],
+                    ["What are you most proud of?:", document.getElementById('proud-input-en').value, "", ""],
+                    ["Who were the three people who influenced you most?:", document.getElementById('influenced-by-input-en').value, "", ""],
+                    ["Who were the three people you influenced most?:", document.getElementById('influenced-others-input-en').value, "", ""],
+                    ["What things did you leave unfinished?:", document.getElementById('unfinished-input-en').value, "", ""],
+                    ["What was your greatest strength you discovered about yourself?:", document.getElementById('strength-input-en').value, "", ""],
+                    ["What are you most grateful for?:", document.getElementById('grateful-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Best Moment ===", "", "", ""],
+                    ["Best moment description:", document.getElementById('best-moment-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Three Words and Book Representing the Past Year ===", "", "", ""],
+                    ["Three words representing the past year:", document.getElementById('three-words-input-en').value, "", ""],
+                    ["Book/movie name representing the past year:", document.getElementById('book-movie-input-en').value, "", ""],
+                    ["Say goodbye to the past year:", document.getElementById('goodbye-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== My Three Biggest Achievements ===", "", "", ""],
+                    ["Three biggest achievements:", document.getElementById('achievements-input-en').value, "", ""],
+                    ["How these achievements were made possible:", document.getElementById('how-achieved-input-en').value, "", ""],
+                    ["Who helped you:", document.getElementById('who-helped-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== My Three Biggest Challenges ===", "", "", ""],
+                    ["Three biggest challenges:", document.getElementById('challenges-input-en').value, "", ""],
+                    ["Who/what helped overcome challenges:", document.getElementById('challenge-help-input-en').value, "", ""],
+                    ["What you learned from overcoming challenges:", document.getElementById('learned-from-challenges-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Forgiveness ===", "", "", ""],
+                    ["Things needing forgiveness:", document.getElementById('forgiveness-input-en').value, "", ""],
+                    ["", "", "", ""],
+                    ["=== Letting Go ===", "", "", ""],
+                    ["Things needing to be let go:", document.getElementById('let-go-complete-input-en').value, "", ""]
+                ];
+            }
             
             // 创建工作簿和工作表
             const wb = XLSX.utils.book_new();
@@ -1372,7 +2424,8 @@
             ws['!cols'] = wscols;
             
             // 将工作表添加到工作簿
-            XLSX.utils.book_append_sheet(wb, ws, "YearCompass结果");
+            const sheetName = currentLang === 'zh' ? "YearCompass结果" : "YearCompass Results";
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
             
             // 生成Excel文件并下载
             const fileName = `YearCompass_${new Date().toISOString().slice(0,10)}.xlsx`;
@@ -1381,13 +2434,6 @@
             // 显示成功消息
             alert(`Excel文件已成功导出为: ${fileName}`);
         }
-        
-        // 自动填充当前日期
-        window.onload = function() {
-            const today = new Date();
-            const formattedDate = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
-            document.getElementById('date-input').value = formattedDate;
-        };
     </script>
     
     <!-- 鼠标拖尾效果脚本 -->
